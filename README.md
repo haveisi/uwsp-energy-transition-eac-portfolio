@@ -1,57 +1,50 @@
 # UWSP Energy Transition & EAC Portfolio
 
-A decision-support case study integrating energy efficiency, onsite solar,
-Environmental Attribute Certificates (EACs), Scope 2 considerations,
-financial scenario analysis, evidence assurance, and transition risk using
-Databricks and Power BI.
+This project started with a simple question:
 
-## Business Question
+**How can an institution make better energy-transition decisions when the technical, financial, and renewable-attribute evidence are scattered across different sources?**
 
-How should an institution combine energy efficiency, onsite renewable
-generation, and environmental attributes while managing:
+I used public UWSP-related energy, solar, emissions, and renewable-energy information to build an end-to-end workflow in Databricks and Power BI.
 
-- cost
-- claim integrity
-- evidence quality
-- financial performance
-- transition risk
+The project connects:
 
-## End-to-End Architecture
-
-Public Evidence → Bronze → Silver → Gold → Power BI
+**public evidence → data validation → emissions and financial analysis → EAC/REC assurance → management reporting**
 
 ![Architecture](assets/architecture.png)
 
-### Bronze
-Preserves source evidence, provenance, and missing fields.
+---
 
-### Silver
-Applies QA/QC, emissions modeling, EAC assurance, financial analysis,
-reconciliation, and transition-risk logic.
+## What I wanted to understand
 
-### Gold
-Provides decision-ready outputs for Power BI.
+I focused on four connected questions:
 
-### Power BI
-Translates the Gold layer into executive decision support.
+- How much electricity can be reduced through energy-efficiency measures?
+- What does onsite solar contribute?
+- Are the renewable attributes behind that electricity actually supported by the evidence available?
+- How does the financial case change under different assumptions?
+
+A big part of the work was making sure I did not mix reported facts, modeled values, and assumptions.
+
+When something could not be verified, I kept it visible as a gap instead of filling it in.
 
 ---
 
-## Page 1 — Energy Transition Decision Dashboard
+## Energy Transition Decision Dashboard
 
 ![Executive Dashboard](assets/executive-dashboard.png)
 
-This page focuses on the financial and environmental performance of the
-energy-transition portfolio.
+The first Power BI page focuses on the energy and financial side of the analysis.
 
-### Key Findings
+### Results
 
-- Energy-efficiency reduction: approximately **4,229 MWh/year**
-- Modeled electricity-related avoided emissions: approximately **2,385 tCO2e/year**
-- Annualized onsite solar generation: approximately **68.89 MWh/year**
-- Simple payback: approximately **14.66 years**
+| Metric | Result |
+|---|---:|
+| Electricity reduction | 4,229 MWh/year |
+| Modeled avoided emissions | 2,385 tCO2e/year |
+| Annualized onsite solar generation | 68.89 MWh/year |
+| Simple payback | 14.66 years |
 
-Financial results vary materially by scenario:
+I also tested the efficiency investment under three financial scenarios:
 
 | Scenario | NPV |
 |---|---:|
@@ -59,79 +52,130 @@ Financial results vary materially by scenario:
 | BASE | -$1.94M |
 | HIGH | -$2.94M |
 
-The analysis demonstrates that project economics depend strongly on
-financing assumptions and future energy-price conditions.
+The result changes a lot depending on the discount rate and energy-price assumptions.
+
+That was one of the main reasons I built the scenario selector in Power BI instead of presenting one NPV as the answer.
 
 ---
 
-## Page 2 — EAC Assurance & Transition Risk
+## EAC Assurance & Transition Risk
 
 ![EAC Assurance Dashboard](assets/eac-assurance-dashboard.png)
 
-This page evaluates whether renewable-electricity claims can be supported
-by the evidence currently assembled.
+The second page looks at a different issue: whether the renewable-electricity position can be supported by the evidence currently available.
 
-### Key Findings
+### Current findings
 
 - Annualized physical solar generation: **68.89 MWh**
 - Claimable renewable electricity based on currently verified ownership evidence: **0 MWh**
 - Historical EAC assurance status: `INSUFFICIENT_EVIDENCE`
-- EAC commodity-price readiness: `COMMODITY_PRICE_EVIDENCE_REQUIRED`
+- EAC price readiness: `COMMODITY_PRICE_EVIDENCE_REQUIRED`
 - Transition-risk status: `HIGH_DEPENDENCE_ON_PURCHASED_EACS`
 
-The model deliberately separates:
+The key lesson here is that these are not the same thing:
 
-**physical generation → attribute ownership → retirement → claim eligibility**
+**physical renewable generation → ownership of the environmental attribute → retirement → claim eligibility**
 
-Missing certificate-level evidence is flagged rather than invented.
+A solar system can physically generate electricity without automatically proving who owns the REC or EAC associated with that generation.
+
+For that reason, I treated unverified ownership conservatively.
+
+`INSUFFICIENT_EVIDENCE` does not mean UWSP did not have valid RECs. It means the public evidence I assembled for this case study was not sufficient for certificate-level verification.
 
 ---
 
-## Decision Controls Demonstrated
+## How I structured the data
 
-The project includes controls for:
+I used a Bronze / Silver / Gold approach in Databricks.
 
-- source provenance
-- source freshness
-- solar physical plausibility
-- EAC / REC ownership
-- certificate retirement
+### Bronze
+
+Bronze keeps the source evidence close to what was actually reported.
+
+Examples include:
+
+- solar monitoring information
+- energy-efficiency project data
+- historical renewable-energy evidence
+- electricity emissions factors
+- financial assumptions
+
+I intentionally kept missing fields as missing.
+
+### Silver
+
+Silver is where I added the analytical controls.
+
+This includes:
+
+- solar plausibility checks
+- source freshness checks
+- EAC / REC ownership and retirement checks
 - evidence completeness
 - emissions calculations
-- reported-versus-modeled reconciliation
 - financial scenario analysis
-- transition-risk classification
-- procurement data requests
+- reconciliation of reported and modeled emissions
+- transition-risk logic
+
+### Gold
+
+Gold contains the small set of metrics needed by Power BI.
+
+The goal was to keep the reporting layer simple and push the validation and business logic upstream.
 
 ---
 
-## Technology Stack
+## Management actions that came out of the analysis
 
-- Databricks
-- Delta Lake
-- SQL
-- Medallion Architecture
-- Power BI
-- DAX
-- Power Query
+The project also highlighted several practical follow-up actions:
+
+1. Verify who owns the renewable attributes associated with onsite solar.
+2. Obtain certificate-level REC / EAC retirement evidence.
+3. Reconcile annual EAC procurement volume with electricity consumption.
+4. Obtain actual REC / EAC commodity pricing or contract evidence.
+5. Review the difference between reported GHG reductions and the electricity-only emissions model.
+
+This was important to me because I did not want the project to stop at identifying data gaps. I wanted the gaps to translate into specific next steps.
 
 ---
 
-## Repository Structure
+## Tools
+
+Databricks, Delta Lake, SQL, Power BI, DAX, Power Query
+
+---
+
+## Repository structure
 
 ```text
 .
 ├── README.md
 ├── assets/
+│   ├── architecture.png
 │   ├── executive-dashboard.png
-│   ├── eac-assurance-dashboard.png
-│   └── architecture.png
+│   └── eac-assurance-dashboard.png
 ├── databricks/
-├── power-bi/
+│   ├── 01_Project_Setup.sql
+│   ├── 02_Bronze_Ingestion.sql
+│   ├── 03_Silver_Validation.sql
+│   └── 10_PowerBI_Gold.sql
 ├── methodology/
+│   ├── assumptions-and-limitations.md
 │   ├── data-lineage.md
 │   ├── eac-assurance-methodology.md
-│   ├── financial-scenarios.md
-│   └── assumptions-and-limitations.md
+│   └── financial-scenarios.md
+├── power-bi/
 └── sources/
     └── source-register.md
+````
+
+---
+
+## Important note
+
+This is an independent portfolio case study built from public information and clearly identified analytical assumptions.
+
+It is not an official UWSP energy, financial, GHG, or REC reporting system.
+
+Where I could not verify a value or claim from the available evidence, I kept that uncertainty visible rather than presenting an unsupported number as fact.
+```
