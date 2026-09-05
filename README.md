@@ -84,6 +84,25 @@ For that reason, I treated unverified ownership conservatively.
 
 ---
 
+### Two-Sided Transition Risk
+
+The transition-risk model tests both supportive and adverse transition conditions.
+
+Scenarios include:
+
+- `POLICY_SUPPORT`
+- `CURRENT_PATH`
+- `GREEN_HEADWIND`
+- `CARBON_CONSTRAINT`
+
+This allows the analysis to test both:
+
+- the risk of delaying or underinvesting in the transition, and
+- the risk that renewable investments themselves become financially challenged under weaker policy support, higher financing costs, or changing market conditions.
+
+The Power BI page compares NPV across all four scenarios while allowing the user to inspect scenario-specific exposure in solar, purchased EACs, and efficiency.
+---
+
 ## How I structured the data
 
 I used a Bronze / Silver / Gold approach in Databricks.
